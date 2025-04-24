@@ -1,3 +1,3 @@
-# NLP
-NLP related Work
+# GEN AI
+GEN AI related Work
 <!--  -->
