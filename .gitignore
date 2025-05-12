@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 NLP/
+.env
 # C extensions
 *.so
 langgraph-env/
