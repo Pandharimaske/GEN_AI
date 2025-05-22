@@ -105,19 +105,36 @@ class Profile(BaseModel):
 
 # ToDo schema
 class ToDo(BaseModel):
-    task: str = Field(description="The task to be completed.")
-    time_to_complete: Optional[int] = Field(description="Estimated time to complete the task (minutes).")
+    """This is the todo of the user you are chatting with.
+    
+    The model should format this as a function call with the following structure:
+    {
+        "task": str,  # A clear, concise description of the task
+        "time_to_complete": int,  # Estimated minutes to complete
+        "deadline": datetime | null,  # When task needs to be done
+        "solutions": list[str],  # At least one specific solution
+        "status": "not started" | "in progress" | "done" | "archived"
+    }
+    """
+    task: str = Field(
+        description="A clear, concise description of the task to be completed.",
+        min_length=5
+    )
+    time_to_complete: Optional[int] = Field(
+        description="Estimated time to complete the task in minutes. Should be a reasonable estimate.",
+        gt=0
+    )
     deadline: Optional[datetime] = Field(
-        description="When the task needs to be completed by (if applicable)",
+        description="When the task needs to be completed by. Leave as null if no deadline specified.",
         default=None
     )
     solutions: list[str] = Field(
-        description="List of specific, actionable solutions (e.g., specific ideas, service providers, or concrete options relevant to completing the task)",
+        description="List of specific, actionable solutions or steps to complete the task. Must include at least one concrete solution.",
         min_items=1,
         default_factory=list
     )
     status: Literal["not started", "in progress", "done", "archived"] = Field(
-        description="Current status of the task",
+        description="Current status of the task. New tasks should be set to 'not started'.",
         default="not started"
     )
 
@@ -187,6 +204,22 @@ Here are your instructions for reasoning about the user's messages:
 TRUSTCALL_INSTRUCTION = """Reflect on following interaction. 
 
 Use the provided tools to retain any necessary memories about the user. 
+
+When creating ToDo items:
+1. Always provide a clear task description
+2. Include at least one specific, actionable solution
+3. Set a reasonable time_to_complete in minutes
+4. Set a deadline if specified, otherwise leave as null
+5. Set status as "not started" for new tasks
+
+Example of a properly formatted ToDo item:
+{
+    "task": "Book dentist appointment",
+    "time_to_complete": 15,
+    "deadline": null,
+    "solutions": ["Call local dental clinic", "Check online booking system"],
+    "status": "not started"
+}
 
 Use parallel tool calling to handle updates and insertions simultaneously.
 
